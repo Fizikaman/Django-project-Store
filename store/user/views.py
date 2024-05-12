@@ -31,7 +31,7 @@ def registration(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Поздравляем с успешной регистрацией!')
-            return HttpResponseRedirect(reverse('login'))
+            return HttpResponseRedirect(reverse('user:login'))
 
     context = {'form': form}
     return render(request, 'user/registration.html', context)
@@ -48,3 +48,8 @@ def profile(request):
 
     context = {'title':'Store - Профиль', 'form':form}
     return render(request, 'user/profile.html', context)
+
+
+def logout(requset):
+    auth.logout(requset)
+    return HttpResponseRedirect(reverse('index'))

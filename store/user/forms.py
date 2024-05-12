@@ -36,7 +36,7 @@ class UserRegistrationForm(UserCreationForm):
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={
         'class':'form-control py-4', 'placeholder':'Введите пароль',
     }))
-    username = forms.CharField(widget=forms.PasswordInput(attrs={
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={
         'class':'form-control py-4', 'placeholder':'Подтвердите пароль',
     }))
 
