@@ -29,3 +29,6 @@ class Basket(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Корзина для {self.user} | Продукт: {self.product}" 
