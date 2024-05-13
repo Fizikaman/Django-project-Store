@@ -1,5 +1,7 @@
 from django.db import models
 
+from user.models import User
+
 # Create your models here.
 
 class ProductCategory(models.Model):
@@ -20,3 +22,10 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return self.name 
+    
+
+class Basket(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
