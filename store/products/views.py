@@ -1,5 +1,6 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 
 from products import models
 
@@ -9,11 +10,18 @@ def index(request):
     return render(request, 'products/index.html')
 
 
-def products(request):
+def products(request, category_id=None):
+    products = models.Product.objects.select_related('category').all()
+
+    if category_id:
+        products = models.Product.objects.select_related('category').filter(category_id=category_id)
+
+    categories = models.ProductCategory.objects.annotate(product_count=Count('product')).all()
+
     context = {
         'title': 'Store - Каталог',
-        'products': models.Product.objects.select_related('category').all(),
-        'categories': models.ProductCategory.objects.all(),
+        'products': products,
+        'categories': categories,
     }
     return render(request, 'products/products.html', context)
 

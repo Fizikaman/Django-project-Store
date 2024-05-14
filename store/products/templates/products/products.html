@@ -16,7 +16,9 @@
                 <h1 class="my-4">Store</h1>
                 <div class="list-group">
                     {% for category in categories %}
-                        <a href="#" class="list-group-item">{{ category.name }}</a>
+                        {% if category.product_count > 0 %}
+                            <a href="{% url 'products:category' category.id %}" class="list-group-item">{{ category.name }}</a>
+                        {% endif %}
                     {% endfor %}
                 </div>
 
