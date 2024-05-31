@@ -1,49 +1,34 @@
-from django.shortcuts import render, HttpResponseRedirect
-from django.contrib import auth, messages
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
+from django.contrib.auth.views import LoginView
+from django.contrib.messages.views import SuccessMessageMixin
 
 from user.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from products.models import Basket
 from user import models
-
-# Create your views here.
-
-def login(request):
-    form = UserLoginForm()
-
-    if request.method == "POST":
-        form = UserLoginForm(data=request.POST)
-        if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            user = auth.authenticate(username=username, password=password)
-            if user:
-                auth.login(request, user)
-                return HttpResponseRedirect(reverse('index'))
-
-    context = {'form': form}
-    return render(request, 'user/login.html', context)
+from common.views import TitleMixin
 
 
+class UserLoginView(TitleMixin, LoginView):
+    template_name = 'user/login.html'
+    form_class = UserLoginForm
+    title = 'Store - Авторизация'
 
-class UserRegistrationView(CreateView):
+
+class UserRegistrationView(TitleMixin, SuccessMessageMixin, CreateView):
     model = models.User
     template_name = 'user/registration.html'
     form_class = UserRegistrationForm
     success_url = reverse_lazy('user:login')
-
-    def get_context_data(self, **kwargs):
-        context = super(UserRegistrationView, self).get_context_data(**kwargs)
-        context['title'] = 'Store - Регистрация'
-        return context
+    title = 'Store - Регистрация'
+    success_message = 'Вы успешно зарегистрированы!'
 
 
-class UserProfileView(UpdateView):
+class UserProfileView(TitleMixin, UpdateView):
     model = models.User
     template_name = 'user/profile.html'
     form_class = UserProfileForm
-    
+    title = 'Store - Личный кабинет'
 
     def get_success_url(self):
         return reverse_lazy('user:profile', args=(self.object.id,))
@@ -51,11 +36,5 @@ class UserProfileView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(UserProfileView, self).get_context_data(**kwargs)
-        context['title'] = 'Store - Личный кабинет'
         context['baskets'] = Basket.objects.select_related('user', 'product').filter(user=self.object)
         return context
-
-
-def logout(requset):
-    auth.logout(requset)
-    return HttpResponseRedirect(reverse('index'))
