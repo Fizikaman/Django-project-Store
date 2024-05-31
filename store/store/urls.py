@@ -22,7 +22,7 @@ from products import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index',),
+    path('', views.IndexView.as_view(), name='index',),
     path('products/', include('products.urls', namespace='products')),
     path('user/', include('user.urls', namespace='user')),
 ]

@@ -1,9 +1,11 @@
 from typing import Any
+from django.db.models.query import QuerySet
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.core.paginator import Paginator
 from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView 
 
 from products import models
 
@@ -18,24 +20,22 @@ class IndexView(TemplateView):
         return context
 
 
-def products(request, category_id=None, page_number=1):
-    products = models.Product.objects.select_related('category').all()
+class ProductListView(ListView):
+    template_name = 'products/products.html'
+    model = models.Product
+    queryset = models.Product.objects.all()
+    paginate_by = 3
 
-    if category_id:
-        products = models.Product.objects.select_related('category').filter(category_id=category_id)
-
-    categories = models.ProductCategory.objects.annotate(product_count=Count('product')).all()
-
-    per_page = 3
-    paginator = Paginator(products, per_page)
-    products_paginator = paginator.page(page_number)
-
-    context = {
-        'title': 'Store - Каталог',
-        'products': products_paginator,
-        'categories': categories,
-    }
-    return render(request, 'products/products.html', context)
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super(ProductListView, self).get_context_data(**kwargs)
+        context['title'] = 'Store - Каталог'
+        context['categories'] = models.ProductCategory.objects.annotate(product_count=Count('product')).all()
+        return context
+    
+    def get_queryset(self) -> QuerySet[Any]:
+        queryset = self.queryset.select_related('category').all()
+        category_id = self.kwargs.get('category_id')
+        return queryset.filter(category_id=category_id) if category_id else queryset
 
 
 @login_required
