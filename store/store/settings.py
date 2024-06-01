@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DOMAIN_NAME = 'http://127.0.0.1:8000'
+
 
 # Application definition
 
@@ -134,8 +136,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#users
+# Users
 AUTH_USER_MODEL = 'user.User'
 LOGIN_URL = '/user/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# EMAILS
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
