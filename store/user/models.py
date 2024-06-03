@@ -1,12 +1,12 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.core.mail import send_mail
-from django.urls import reverse
 from urllib.parse import quote
+
+from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
+from django.db import models
+from django.urls import reverse
 from django.utils.timezone import now
 
 from store.settings import DEFAULT_FROM_EMAIL, DOMAIN_NAME
-
 
 
 class User(AbstractUser):
@@ -24,7 +24,7 @@ class EmailVerification(models.Model):
         return f"Email Verification for {self.user.email}"
     
     def send_verification_email(self):
-        link = reverse('user:email_verification', kwargs={'email':quote(self.user.email), 'code':self.code})
+        link = reverse('user:email_verification', kwargs={'email': quote(self.user.email), 'code': self.code})
         verification_link = f"{DOMAIN_NAME}{link}"
         subject = f"Подтверждение учетной записи для {self.user.username}"
         message = "Для подтверждения учетной записи для {} перейдите по ссылке: {}".format(

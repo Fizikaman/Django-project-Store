@@ -1,7 +1,8 @@
 from django.contrib import admin
 
-from user.models import User, EmailVerification
 from products.admin import BasketAdmin
+from user.models import EmailVerification, User
+
 # Register your models here.
 
 

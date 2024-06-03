@@ -2,7 +2,6 @@ from django.db import models
 
 from user.models import User
 
-# Create your models here.
 
 class ProductCategory(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -22,7 +21,7 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return self.name 
-
+    
 
 class BasketQuerySet(models.QuerySet):
     
