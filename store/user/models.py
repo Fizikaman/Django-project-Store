@@ -4,7 +4,6 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from urllib.parse import quote
 from django.utils.timezone import now
-from django.db import transaction
 
 from store.settings import DEFAULT_FROM_EMAIL, DOMAIN_NAME
 

@@ -36,12 +36,6 @@ class UserProfileView(TitleMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('user:profile', args=(self.object.id,))
-
-
-    def get_context_data(self, **kwargs):
-        context = super(UserProfileView, self).get_context_data(**kwargs)
-        context['baskets'] = Basket.objects.select_related('user', 'product').filter(user=self.object)
-        return context
     
 
 class EmailVerificationView(TitleMixin, TemplateView):
