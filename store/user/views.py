@@ -5,6 +5,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.base import TemplateView
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
+from urllib.parse import unquote
 
 from user.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from products.models import Basket
@@ -48,9 +49,11 @@ class EmailVerificationView(TitleMixin, TemplateView):
     template_name = 'user/email_verification.html'
 
     def get(self, request, *args, **kwargs):
+        email = unquote(kwargs['email'])
         code = kwargs['code']
-        user = models.User.objects.get(email=kwargs['email'])
+        user = models.User.objects.get(email=email)
         email_verification = models.EmailVerification.objects.filter(user=user, code=code)
+        print(f"email_verification: {email_verification}. email_verification: {email_verification.first().is_expired()}")
         if email_verification.exists() and email_verification.first().is_expired():
             user.is_verified_email = True
             user.save()
