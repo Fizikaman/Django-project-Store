@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.db.models import Count
 from django.db.models.query import QuerySet
 from django.shortcuts import HttpResponseRedirect
@@ -25,13 +26,30 @@ class ProductListView(TitleMixin, ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super(ProductListView, self).get_context_data(**kwargs)
-        context['categories'] = models.ProductCategory.objects.annotate(product_count=Count('product')).all()
+        categories = cache.get('categories')
+        if not categories:
+            context['categories'] = models.ProductCategory.objects.annotate(product_count=Count('product')).all()
+            cache.set('categories', context['categories'], 60)
+        else:
+            context['categories'] = categories
         return context
     
-    def get_queryset(self) -> QuerySet[Any]:
-        queryset = self.queryset.select_related('category').all()
+    def get_cache_key(self) -> str:
         category_id = self.kwargs.get('category_id')
-        return queryset.filter(category_id=category_id) if category_id else queryset
+        return f'queryset_cache_{self.__class__.__name__}_{category_id}'
+
+    def get_queryset(self) -> QuerySet[Any]:
+        cache_key = self.get_cache_key()
+        queryset = cache.get(cache_key)
+
+        if queryset is None:
+            queryset = self.queryset.select_related('category').all()
+            category_id = self.kwargs.get('category_id')
+            if category_id:
+                queryset = queryset.filter(category_id=category_id)
+            cache.set(cache_key, queryset, timeout=300)  # Cache timeout in seconds
+
+        return queryset
 
 
 @login_required

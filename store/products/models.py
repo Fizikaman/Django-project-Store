@@ -20,11 +20,11 @@ class Product(models.Model):
     category = models.ForeignKey(to=ProductCategory, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return self.name 
-    
+        return self.name
+
 
 class BasketQuerySet(models.QuerySet):
-    
+
     def total_sum(self):
         return sum(basket.sum() for basket in self)
     
