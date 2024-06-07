@@ -6,6 +6,7 @@ from django.shortcuts import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, UpdateView
+from django.contrib.auth import logout
 
 from common.views import TitleMixin
 from user import models
@@ -53,3 +54,8 @@ class EmailVerificationView(TitleMixin, TemplateView):
             return super(EmailVerificationView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseRedirect(reverse('index'))
+        
+
+def userlogout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('index'))
