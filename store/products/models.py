@@ -1,6 +1,10 @@
+from typing import Iterable
 from django.db import models
 
+import stripe
+
 from user.models import User
+from store.settings import STRIPE_SECRET_KEY
 
 
 class ProductCategory(models.Model):
@@ -17,10 +21,26 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     quantity = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='products_images')
+    stripe_product_price_id = models.CharField(max_length=128, null=True, blank=True)
     category = models.ForeignKey(to=ProductCategory, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.name
+    
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+        if not self.stripe_product_price_id:
+            stripe_product_price = self.create_stripe_product_price()
+            self.stripe_product_price_id = stripe_product_price['id']
+        super(Product, self).save(force_insert, force_update, using, update_fields)
+    
+    def create_stripe_product_price(self):
+         stripe_product = stripe.Product.create(name=self.name)
+         stripe_product_price = stripe.Price.create(
+             product=stripe_product['id'],
+             unit_amount=round(self.price * 100),
+             currency='rub',
+         )
+         return stripe_product_price
 
 
 class BasketQuerySet(models.QuerySet):
@@ -30,6 +50,16 @@ class BasketQuerySet(models.QuerySet):
     
     def total_quantity(self):
         return sum(basket.quantity for basket in self)
+    
+    def stripe_products(self):
+        line_items = []
+        for basket in self:
+            item = {
+                    'price': basket.product.stripe_product_price_id,
+                    'quantity': basket.quantity,
+                }
+            line_items.append(item)
+        return line_items
 
 
 class Basket(models.Model):
