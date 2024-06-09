@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from orders.forms import OrderForms
+from orders.models import Order
 from products.models import Basket
 from common.views import TitleMixin
 from store.settings import STRIPE_SECRET_KEY, DOMAIN_NAME, STRIPE_WEBHOOK_SECRET
@@ -51,37 +52,33 @@ class OrderCreateView(TitleMixin, CreateView):
 
 @csrf_exempt
 def stripe_webhook_view(request):
-  payload = request.body
-  sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-  event = None
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
 
-  try:
-    event = stripe.Webhook.construct_event(
-      payload, sig_header, STRIPE_WEBHOOK_SECRET
-    )
-  except ValueError as e:
-    # Invalid payload
-    return HttpResponse(status=400)
-  except stripe.error.SignatureVerificationError as e:
-    # Invalid signature
-    return HttpResponse(status=400)
+    try:
+        event = stripe.Webhook.construct_event(
+        payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
 
-  # Handle the checkout.session.completed event
-  if event['type'] == 'checkout.session.completed':
-    # Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
-    session = stripe.checkout.Session.retrieve(
-      event['data']['object']['id'],
-      expand=['line_items'],
-    )
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        # Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
+        session = event['data']['object']
+    
+        fulfill_order(session)
 
-    line_items = session.line_items
-    # Fulfill the purchase...
-    fulfill_order(line_items)
-
-  # Passed signature verification
-  return HttpResponse(status=200)
+    # Passed signature verification
+    return HttpResponse(status=200)
 
 
-def fulfill_order(line_items):
-  # TODO: fill me in
-  print("Fulfilling order")
+def fulfill_order(session):
+  order_id = int(session.metadata.order_id)
+  order = Order.objects.get(id=order_id)
+  order.update_after_payment()
