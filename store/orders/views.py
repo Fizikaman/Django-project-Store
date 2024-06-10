@@ -1,19 +1,21 @@
-from django.db.models.query import QuerySet
-import stripe
 from http import HTTPStatus
 
-from django.views.generic.edit import CreateView
-from django.views.generic.base import TemplateView
-from django.views.generic.list import ListView
-from django.urls import reverse_lazy, reverse
-from django.http import HttpResponseRedirect, HttpResponse
+import stripe
+from django.db.models.query import QuerySet
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView
+from django.views.generic.list import ListView
 
+from common.views import TitleMixin
 from orders.forms import OrderForms
 from orders.models import Order
 from products.models import Basket
-from common.views import TitleMixin
-from store.settings import STRIPE_SECRET_KEY, DOMAIN_NAME, STRIPE_WEBHOOK_SECRET
+from store.settings import (DOMAIN_NAME, STRIPE_SECRET_KEY,
+                            STRIPE_WEBHOOK_SECRET)
 
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -36,6 +38,16 @@ class OrderListView(TitleMixin, ListView):
     def get_queryset(self):
         queryset = super(OrderListView, self).get_queryset()
         return queryset.filter(initiator=self.request.user)
+    
+
+class OrderDetailView(DetailView):
+    template_name = 'orders/order.html'
+    model = Order
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        context['title'] = f"Store - Заказ №{self.object.id}"
+        return context
 
 
 class OrderCreateView(TitleMixin, CreateView):

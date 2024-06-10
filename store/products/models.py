@@ -1,10 +1,10 @@
 from typing import Iterable
-from django.db import models
 
 import stripe
+from django.db import models
 
-from user.models import User
 from store.settings import STRIPE_SECRET_KEY
+from user.models import User
 
 
 class ProductCategory(models.Model):
