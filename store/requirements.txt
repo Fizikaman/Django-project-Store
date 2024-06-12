@@ -13,6 +13,7 @@ colorama==0.4.6
 Django==5.0.6
 django-allauth==0.63.3
 django-debug-toolbar==4.4.2
+django-extensions==3.2.3
 django-redis==5.4.0
 flake8==7.0.0
 idna==3.7
