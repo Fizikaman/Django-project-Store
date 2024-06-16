@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
+    #'allauth.socialaccount.providers.google',
+    #'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.vk',
 
     'products',
     'user',
@@ -163,12 +166,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# if DEBUG:
-#     STATICFILES_DIRS = [
-#         BASE_DIR / 'static',
-#     ]
-# else:
-STATIC_ROOT = BASE_DIR / 'static'
+if DEBUG:
+     STATICFILES_DIRS = [
+         BASE_DIR / 'static',
+     ]
+else:
+    STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -196,10 +199,13 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = os.environ.get('ORDERS_EMAIL')
 
+
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
+
 
 SITE_ID = 1
 
@@ -210,7 +216,24 @@ SOCIALACCOUNT_PROVIDER = {
             'repo',
             'read:org',
         }
-    }
+    },
+    'facebook': {
+        'METHOD': 'oauth2',  # Set to 'js_sdk' to use the Facebook connect SDK
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'name',
+            'name_format',
+            'picture',
+            'short_name'
+        ],
+    },
+
 }
 
 #celery
