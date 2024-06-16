@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django.contrib.humanize',
     'django_extensions',
+    'rest_framework',
 
     'allauth',
     'allauth.account',
